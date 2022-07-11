@@ -113,13 +113,16 @@ void system_win::stop()
 	CoUninitialize();
 }
 
-std::wstring system_win::get_property(const std::string& txt)
+std::wstring system_win::get_property(const std::string& db, const std::wstring& name)
 {
 	HRESULT hres;
 	IEnumWbemClassObject* pEnumerator = NULL;
+
+	std::string query_text = "SELECT * FROM " + db;
+
 	hres = static_cast<IWbemServices*>(this->m_pSvc)->ExecQuery(
 		bstr_t("WQL"),
-		bstr_t("SELECT * FROM WIN32_OperatingSystem"),
+		bstr_t(query_text.c_str()),
 		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
 		NULL,
 		&pEnumerator
@@ -148,7 +151,7 @@ std::wstring system_win::get_property(const std::string& txt)
 
 		VariantInit(&vtProp);
 		// Get the value of the Name property
-		hr = pclsObj->Get(L"Name", 0, &vtProp, 0, 0);
+		hr = pclsObj->Get(name.c_str(), 0, &vtProp, 0, 0);
 		rvalue = vtProp.bstrVal;
 		VariantClear(&vtProp);
 

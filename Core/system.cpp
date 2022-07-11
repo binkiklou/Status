@@ -11,7 +11,7 @@
 // Doesn't work on some compilers unless defined
 bool system_impl::start() { return false; }
 void system_impl::stop() {}
-std::wstring system_impl::get_property(const std::string& s) { return L"err"; }
+std::wstring system_impl::get_property(const std::string& a, const std::wstring& b) { return L"err"; }
 //===================================================
 
 system_info::system_info()
@@ -31,5 +31,5 @@ system_info::~system_info()
 
 void system_info::get_cpu()
 {
-    std::wcout<<"Property:"<<this->m_impl->get_property("Name")<<std::endl;
+    std::wcout<<"Property:"<<this->m_impl->get_property("WIN32_OperatingSystem", L"Caption") << std::endl;
 }
