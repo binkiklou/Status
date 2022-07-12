@@ -31,5 +31,5 @@ system_info::~system_info()
 
 void system_info::get_cpu()
 {
-    std::wcout<<"Property:"<<this->m_impl->get_property("WIN32_OperatingSystem", L"Caption") << std::endl;
+    std::wcout<<"Temperature:"<<this->m_impl->get_property("MSAcpi_ThermalZoneTemperature", L"CurrentTemperature") << std::endl;
 }

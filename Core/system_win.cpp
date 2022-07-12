@@ -57,7 +57,7 @@ bool system_win::start()
 	IWbemServices* pSvc = static_cast<IWbemServices*>(this->m_pSvc);
 
 	hres = static_cast<IWbemLocator*>(m_pLoc)->ConnectServer(
-		_bstr_t(L"ROOT\\CIMV2"),
+		_bstr_t(L"ROOT\\WMI"),
 		NULL,
 		NULL,
 		0,
@@ -152,7 +152,7 @@ std::wstring system_win::get_property(const std::string& db, const std::wstring&
 		VariantInit(&vtProp);
 		// Get the value of the Name property
 		hr = pclsObj->Get(name.c_str(), 0, &vtProp, 0, 0);
-		rvalue = vtProp.bstrVal;
+		rvalue = std::to_wstring(vtProp.uintVal);
 		VariantClear(&vtProp);
 
 		pclsObj->Release();
