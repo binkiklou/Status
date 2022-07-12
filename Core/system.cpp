@@ -1,6 +1,7 @@
 #include "system.hpp"
 
 #include <new>
+#include <string>
 #include <iostream>
 
 #ifdef _WIN32
@@ -31,5 +32,6 @@ system_info::~system_info()
 
 void system_info::get_cpu()
 {
-    std::wcout<<"Temperature:"<<this->m_impl->get_property("MSAcpi_ThermalZoneTemperature", L"CurrentTemperature") << std::endl;
+    float temp = ((std::stoi(this->m_impl->get_property("MSAcpi_ThermalZoneTemperature", L"CurrentTemperature")))/10) - 273;
+    std::cout << "Temperature:" << temp << "*C" << std::endl;
 }

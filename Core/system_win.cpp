@@ -152,7 +152,7 @@ std::wstring system_win::get_property(const std::string& db, const std::wstring&
 		VariantInit(&vtProp);
 		// Get the value of the Name property
 		hr = pclsObj->Get(name.c_str(), 0, &vtProp, 0, 0);
-		rvalue = std::to_wstring(vtProp.uintVal);
+		rvalue = std::to_wstring(vtProp.uintVal); // eww
 		VariantClear(&vtProp);
 
 		pclsObj->Release();
