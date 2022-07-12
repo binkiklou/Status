@@ -7,7 +7,7 @@ class system_impl
 public:
 	virtual bool start(); // Returns true if succesfull
 	virtual void stop();
-	virtual std::wstring get_property(const std::string&, const std::wstring&);
+	virtual std::wstring get_property(const std::string&, const std::wstring&, int);
 };
 
 class system_info

@@ -11,11 +11,7 @@
 
 bool system_win::start()
 {
-	this->m_pLoc = NULL;
-	this->m_pSvc = NULL;
-
 	HRESULT hres;
-
 	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
 	if (FAILED(hres)) {
 		std::cout << "A" << std::endl;
@@ -34,93 +30,40 @@ bool system_win::start()
 		NULL
 	);
 	if (FAILED(hres)) {
-		std::cout << "B" << std::endl;
+		std::cout << "Couldn't init security for this server." << std::endl;
 		CoUninitialize();
 		return false;
 	}
 
-	// Connect to server
-	hres = CoCreateInstance(
-		CLSID_WbemLocator,
-		0,
-		CLSCTX_INPROC_SERVER,
-		IID_IWbemLocator,
-		(LPVOID*) &this->m_pLoc
-	);
-	if (FAILED(hres)) {
-		std::cout << "C" << std::endl;
-		CoUninitialize();
+	if (!connect(L"ROOT\\CIMV2")) {
+		std::cout << "Connection 0 failed" << std::endl;
 		return false;
 	}
 
-	// This doesn't need to exist, right?
-	IWbemServices* pSvc = static_cast<IWbemServices*>(this->m_pSvc);
-
-	hres = static_cast<IWbemLocator*>(m_pLoc)->ConnectServer(
-		_bstr_t(L"ROOT\\WMI"),
-		NULL,
-		NULL,
-		0,
-		NULL,
-		0,
-		0,
-		&pSvc
-	);
-	if (FAILED(hres)) {
-		std::cout << "Couldn't establish connection to windows server " << std::hex << hres << std::endl;
-		static_cast<IWbemLocator*>(this->m_pLoc)->Release();
-		CoUninitialize();
+	// Need admin for this connection to work
+	if (!connect(L"ROOT\\WMI")) {
+		std::cout << "Connection 1 failed" << std::endl;
 		return false;
 	}
-
-	this->m_pSvc = pSvc;
-
-	hres = CoSetProxyBlanket(
-		pSvc,                        // Indicates the proxy to set
-		RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
-		RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
-		NULL,                        // Server principal name 
-		RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx 
-		RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
-		NULL,                        // client identity
-		EOAC_NONE                    // proxy capabilities 
-	);
-	if (FAILED(hres)) {
-		std::cout << "Could not set proxy blanket" << std::endl;
-		pSvc->Release();
-		static_cast<IWbemLocator*>(this->m_pLoc)->Release();
-		CoUninitialize();
-		return false;
-	}
-
-	std::cout << "Windows server connection established" << std::endl;
 
 	return true;
 }
 
 void system_win::stop()
 {
-	if (this->m_pSvc != NULL) 
-	{
-		static_cast<IWbemServices*>(this->m_pSvc)->Release();
-	}
-
-	if (this->m_pLoc != NULL)
-	{
-		static_cast<IWbemLocator*>(this->m_pLoc)->Release();
-	}
-
-	CoUninitialize();
 }
 
-std::wstring system_win::get_property(const std::string& db, const std::wstring& name)
+std::wstring system_win::get_property(const std::string& db, const std::wstring& name, int i)
 {
+	IWbemLocator* pLoc = static_cast<IWbemLocator*>(this->connections[i].first);
+	IWbemServices* pSvc = static_cast<IWbemServices*>(this->connections[i].second);
+
 	HRESULT hres;
 	IEnumWbemClassObject* pEnumerator = NULL;
 
 	std::string query_text = "SELECT * FROM " + db;
 
-	hres = static_cast<IWbemServices*>(this->m_pSvc)->ExecQuery(
+	hres = static_cast<IWbemServices*>(pSvc)->ExecQuery(
 		bstr_t("WQL"),
 		bstr_t(query_text.c_str()),
 		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
@@ -129,8 +72,8 @@ std::wstring system_win::get_property(const std::string& db, const std::wstring&
 	);
 	if (FAILED(hres)) {
 		std::cout << "Query failed" << std::endl;
-		static_cast<IWbemServices*>(this->m_pSvc)->Release();
-		static_cast<IWbemLocator*>(this->m_pLoc)->Release();
+		static_cast<IWbemServices*>(pSvc)->Release();
+		static_cast<IWbemLocator*>(pLoc)->Release();
 		CoUninitialize();
 		return L"err"; // sketchy at best
 	}
@@ -158,4 +101,73 @@ std::wstring system_win::get_property(const std::string& db, const std::wstring&
 		pclsObj->Release();
 	}
 	return rvalue;
+}
+
+bool system_win::connect(const std::wstring& svr_name)
+{
+	IWbemLocator* pLoc = NULL;
+	IWbemServices* pSvc = NULL;
+
+	HRESULT hres;
+
+	// Connect to server
+	hres = CoCreateInstance(
+		CLSID_WbemLocator,
+		0,
+		CLSCTX_INPROC_SERVER,
+		IID_IWbemLocator,
+		(LPVOID*)&pLoc
+	);
+	if (FAILED(hres)) {
+		std::cout << "C" << std::endl;
+		CoUninitialize();
+		return false;
+	}
+
+	hres = pLoc->ConnectServer(
+		_bstr_t(svr_name.c_str()),
+		NULL,
+		NULL,
+		0,
+		NULL,
+		0,
+		0,
+		&pSvc
+	);
+	if (FAILED(hres)) {
+		std::cout << "Couldn't establish connection to windows server " << std::hex << hres << std::endl;
+		pLoc->Release();
+		CoUninitialize();
+		return false;
+	}
+
+	hres = CoSetProxyBlanket(
+		pSvc,                        // Indicates the proxy to set
+		RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
+		RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
+		NULL,                        // Server principal name 
+		RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx 
+		RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
+		NULL,                        // client identity
+		EOAC_NONE                    // proxy capabilities 
+	);
+	if (FAILED(hres)) {
+		std::cout << "Could not set proxy blanket" << std::endl;
+		pSvc->Release();
+		pLoc->Release();
+		CoUninitialize();
+		return false;
+	}
+
+	std::pair<void*, void*> builder; // pair builder
+	builder.first = pLoc;
+	builder.second = pSvc;
+	this->connections.push_back(builder);
+
+	return true;
+}
+
+void system_win::disconnect(int i)
+{
+
 }

@@ -4,14 +4,17 @@
 
 #include <string>
 #include <thread>
+#include <vector>
 
 class system_win : public system_impl
 {
 public:
 	bool start() override;
 	void stop() override;
-	std::wstring get_property(const std::string&, const std::wstring&) override;
+	std::wstring get_property(const std::string&, const std::wstring&, int) override;
+	
+	bool connect(const std::wstring&);
+	void disconnect(int);
 private:
-	void* m_pLoc = NULL;
-	void* m_pSvc = NULL;
+	std::vector<std::pair<void*, void*>> connections;
 };

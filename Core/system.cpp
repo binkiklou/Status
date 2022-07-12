@@ -12,7 +12,7 @@
 // Doesn't work on some compilers unless defined
 bool system_impl::start() { return false; }
 void system_impl::stop() {}
-std::wstring system_impl::get_property(const std::string& a, const std::wstring& b) { return L"err"; }
+std::wstring system_impl::get_property(const std::string& a, const std::wstring& b, int c) { return L"err"; }
 //===================================================
 
 system_info::system_info()
@@ -32,6 +32,6 @@ system_info::~system_info()
 
 void system_info::get_cpu()
 {
-    float temp = ((std::stoi(this->m_impl->get_property("MSAcpi_ThermalZoneTemperature", L"CurrentTemperature")))/10) - 273;
+    float temp = ((std::stoi(this->m_impl->get_property("MSAcpi_ThermalZoneTemperature", L"CurrentTemperature", 1)))/10) - 273;
     std::cout << "Temperature:" << temp << "*C" << std::endl;
 }
