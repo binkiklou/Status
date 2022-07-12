@@ -6,5 +6,7 @@ int main()
 
 	sys.get_cpu();
 
+	while(true){}
+
 	return 0;
 }

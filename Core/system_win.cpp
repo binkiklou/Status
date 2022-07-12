@@ -11,6 +11,38 @@
 
 bool system_win::start()
 {
+	// Check if admin
+	bool is_admin = false;
+	HANDLE hToken = NULL;
+	if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+		TOKEN_ELEVATION tkne;
+		DWORD cbSize = sizeof(tkne);
+		if (GetTokenInformation(hToken, TokenElevation, &tkne, sizeof(tkne), &cbSize)) {
+			is_admin = tkne.TokenIsElevated;
+		}
+	}
+	if (hToken) {
+		CloseHandle(hToken);
+	}
+	
+	if (!is_admin) {
+		std::cout << "Not running as admin" << std::endl;
+
+		// Restart with admin permissions
+		ShellExecuteA(NULL,
+			"runas",
+			"x64\\Release\\Core.exe",
+			NULL,
+			NULL,                        // default dir 
+			SW_SHOWNORMAL
+		);
+		std::exit(0);
+	}
+	else {
+		std::cout << "Running as admin" << std::endl;
+	}
+
+	// Init COM library
 	HRESULT hres;
 	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
 	if (FAILED(hres)) {
@@ -30,7 +62,7 @@ bool system_win::start()
 		NULL
 	);
 	if (FAILED(hres)) {
-		std::cout << "Couldn't init security for this server." << std::endl;
+		std::cout << "Couldn't init security" << std::endl;
 		CoUninitialize();
 		return false;
 	}
