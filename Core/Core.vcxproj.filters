@@ -24,15 +24,24 @@
     <ClCompile Include="system_win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="display_win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="httplib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="system_win.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="display.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="display_win.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

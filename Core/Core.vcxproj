@@ -127,12 +127,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="display.cpp" />
+    <ClCompile Include="display_win.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="system.cpp" />
     <ClCompile Include="system_win.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="httplib.h" />
+    <ClInclude Include="display.hpp" />
+    <ClInclude Include="display_win.hpp" />
     <ClInclude Include="system.hpp" />
     <ClInclude Include="system_win.hpp" />
   </ItemGroup>
