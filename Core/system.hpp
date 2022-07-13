@@ -16,7 +16,17 @@ public:
 	system_info();
 	~system_info();
 
-	void get_cpu();
+	void fetch_specs();
+	void update_info();
+
+	// Constants
+	std::string cpu_name;
+	std::string gpu_name;
+
+	// Variables
+
+	// Acpi_ThermalZoneTemperature, in Celsius
+	float temperature;
 private:
 	// TODO: unique_ptr
 	system_impl* m_impl;

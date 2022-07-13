@@ -30,8 +30,12 @@ system_info::~system_info()
     this->m_impl->stop();
 }
 
-void system_info::get_cpu()
+void system_info::fetch_specs()
 {
-    float temp = ((std::stoi(this->m_impl->get_property("MSAcpi_ThermalZoneTemperature", L"CurrentTemperature", 1)))/10) - 273;
-    std::cout << "Temperature:" << temp << "*C" << std::endl;
+
+}
+
+void system_info::update_info()
+{
+    this->temperature = (( std::stoi(this->m_impl->get_property("MSAcpi_ThermalZoneTemperature", L"CurrentTemperature", 1)) )/10) - 273;
 }

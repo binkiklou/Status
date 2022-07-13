@@ -7,12 +7,17 @@
 
 int main()
 {
+	system_info sys;
 	display d;
 
 	int elapsed_ticks = 0;
 
+	sys.fetch_specs();
+
 	while (true) {
-		d.put_slider("elapsed", elapsed_ticks, 0, 20, std::to_string(elapsed_ticks) + "s");
+		sys.update_info();
+		d.put_slider("temp", sys.temperature, 0, 100, std::to_string((int)sys.temperature) + "*C");
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		d.update();
 
